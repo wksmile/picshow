@@ -2,7 +2,7 @@
   <div class="wrapper">
       <div class="content">
         <div class="head">PicShow</div>
-        <ul class="loginInfor" @blur.capture="check">
+        <ul class="loginInfor">
           <li>
             <input v-bind:class="[isFocuse?focuse:'']" v-on:focus="addFocuse" v-on:blur="removeFocuse" type="text" name="username" placeholder="用户名或注册邮箱" v-model="username"/>
           </li>
@@ -10,7 +10,7 @@
             <input placeholder="密码" v-model="password"/>
           </li>
           <li>
-            <input type="button" value="登录"></input>
+            <input type="button" value="登录" @click="login"></input>
           </li>
         </ul>
         <div class="tip">尚未拥有账户？
@@ -22,6 +22,7 @@
 
 <script>
   import axios from 'axios';
+  import $ from 'jquery';
 
     export default {
       data () {
@@ -50,18 +51,21 @@
             var typenum;
             var regex = /^([0-9A-Za-z\-_\.]+)@([0-9a-z]+\.[a-z]{2,3}(\.[a-z]{2})?)$/g;
             if(regex.test(this.username)) {
-              typenum = 0   // 邮箱
+              typenum = 2   // 邮箱
             } else {
               typenum = 1  // 用户名
             }
-          axios.post('/user', {
+            var that = this;
+          $.post('http://192.168.1.104:8083/user/login', {
             username: this.username,
             password: this.password,
             type: typenum
           })
-          .then(function (response) {
+          .then(function (res) {
               // 是否出错
-            console.log(response);
+            console.log("登录成功",res);
+            window.document.cookie="token="+res.data;
+            that.$router.push('/');
           })
           .catch(function (error) {
             console.log(error);
