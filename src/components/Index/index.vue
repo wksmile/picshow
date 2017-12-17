@@ -1,11 +1,11 @@
 <template>
   <div class="main-page">
     <div class="bgPic">
-      <img src="../../public/images/stock.jpg">
+      <re-gallery></re-gallery>
     </div>
     <div class="lists">
       <ul>
-        <li v-for="a in 2" class="list">
+        <li v-for="a in 3" class="list">
           <interest-block></interest-block>
         </li>
       </ul>
@@ -14,11 +14,26 @@
 </template>
 
 <script>
+  import ReGallery from "../ReGallery";
   import InterestBlock from "../InterestBlock";
+  import $ from 'jquery';
+  import Cookies from 'js-cookie';
 
     export default {
+        mounted: function () {
+              if(Cookies.get('token')) {
+                console.log('token:---',Cookies.get('token'));
+                $.post("http://192.168.1.104:8083/user/token",{token:Cookies.get('token')})
+                  .done(function(res){
+                    console.log('getToken:',res);
+                  });
+              } else {
+                console.log('cookie error');
+              }
+        },
         components:{
-          InterestBlock
+          InterestBlock,
+          ReGallery
         }
     }
 </script>
@@ -30,13 +45,17 @@
     list-style: none;
   }
 
+  .bgPic {
+    width: 100%;
+  }
+
   .bgPic img {
     width: 100%;
+    margin-top: 78px;
   }
 
   .lists {
     width: 100%;
-    margin-left: 30%;
   }
 
   .list {
