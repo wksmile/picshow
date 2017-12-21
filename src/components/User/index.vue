@@ -13,49 +13,92 @@
             <img src="../../public/images/address.png">
             {{information.address}}
           </span>
-          <span>
-            <img src="../../public/images/man.png">
-            {{information.sex}}</span>
-          <span>
-            {{information.age}}
+          <span v-if="information.sex">
+            <img :src="sexPic">
+          </span>
+          <span v-if="information.age">
+            年龄：{{information.age}}
           </span>
           <span>
-            编辑个人信息
-            <img src="../../public/images/setting.png">
+            <router-link to="/editUser">
+              编辑个人信息
+              <img src="../../public/images/setting.png">
+            </router-link>
           </span>
         </div>
         <div class="user-choose">
-          <span>
-            关注
-          </span>
-          <span>
-            粉丝
-          </span>
-          <span>已发布</span>
-          <span>收藏</span>
+          <span @click="changeComponent('Attention')">关注</span>
+          <span @click="changeComponent('Fans')">粉丝</span>
+          <span @click="changeComponent('Launched')">已发布</span>
+          <span @click="changeComponent('Collect')">收藏</span>
+          <span @click="changeComponent('Collect')">赞</span>
         </div>
       </div>
       <div class="bottom">
-        <div>
-          <ul>
-            <comment v-for="list in 4"></comment>
-          </ul>
-        </div>
+        <transition name="component-fade" mode="out-in">
+          <component v-bind:is="view"></component>
+        </transition>
       </div>
     </div>
   </div>
 </template>
 
 <script>
-  import {mapState} from 'vuex';
+  import {mapState, mapMutations} from 'vuex';
+  import $ from 'jquery';
+  import Attention from './Attention';   // 已关注
+  import Collect from './Collect';       // 已收藏
+  import Launched from './Launched';     // 已发布
   import Comment from '../Comment';
+  import Fans from './Fans';              //  粉丝
+  import man from '../../public/images/man.png';
+  import women from '../../public/images/women.png';
 
   export default {
+    data () {
+      return {
+        view: 'Attention'
+      }
+    },
     computed: {
-      ...mapState(['information'])
+      ...mapState(['information']),
+      sexPic () {
+        if (this.information.sex == 1) return man;
+        if (this.information.sex == 2) return women;
+        return null;
+      }
+    },
+    created () {
+      if(Cookies.get('token')) {
+        console.log('token:---',Cookies.get('token'));
+        var that = this;
+        $.post("http://192.168.1.104:8083/user/token",{
+          token: Cookies.get('token')
+        })
+        .done(function(res){
+          if(res.status == 200 && res.data.id == that.information.id) {
+            that.SET_INFORMATION(res.data);
+          } else {
+              return;
+          }
+          console.log('getToken:',res);
+        });
+      } else {
+        console.log('has not logined');
+      }
+    },
+    methods: {
+      ...mapMutations(['SET_INFORMATION']),
+      changeComponent (cpt) {
+        this.view = cpt;
+      }
     },
     components: {
-      Comment
+      Comment,
+      Attention,
+      Launched,
+      Collect,
+      Fans
     }
   }
 </script>
@@ -113,8 +156,8 @@
   }
 
   .detail img {
-    width: 25px;
-    height: 25px;
+    width: 20px;
+    height: 20px;
   }
 
   .nickname {
@@ -130,10 +173,15 @@
     padding: 5px 7px;
   }
 
+  .user-choose span:hover {
+    color: burlywood;
+    cursor: pointer;
+  }
+
   .bottom {
     margin-top: 10px;
     box-sizing: border-box;
-    padding: 15px;
+    padding: 5px;
     width: 100%;
     text-align: left;
   }
