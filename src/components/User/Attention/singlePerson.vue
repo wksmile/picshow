@@ -9,7 +9,7 @@
           <img :src="sexPic" with="16" height="16">
         </span>
       </p>
-      <p><img src="../../../public/images/attention-eachother.png" width="16" height="16">互相关注</p>
+      <p><img :src="attendImg" width="22" height="22">{{attendTxt}}</p>
       <p class="description">{{information.description}}</p>
     </div>
   </div>
@@ -19,14 +19,26 @@
   import {mapState} from 'vuex';
   import man from '../../../public/images/man.png';
   import women from '../../../public/images/women.png';
+  import attend from '../../../public/images/attend.png';
+  import attendOther from '../../../public/images/attention-other.png';
 
   export default {
+    data () {
+      return {
+      }
+    },
+    props: ['information'],
     computed: {
-      ...mapState(['information']),
       sexPic () {
         if (this.information.sex == 1) return man;
         if (this.information.sex == 2) return women;
         return null;
+      },
+      attendImg () {
+        return this.information.follow == 1 ? attend : attendOther;
+      },
+      attendTxt () {
+        return this.information.follow == 1 ? '已关注' : '关注';
       }
     }
   }
