@@ -1,6 +1,8 @@
-# instagram
+# PicShow
 
-> A Vue.js project
+> Vue + vue-router + vuex 实现一个图片社交网站
+
+项目开发中......
 
 ## Build Setup
 
