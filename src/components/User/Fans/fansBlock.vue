@@ -1,12 +1,12 @@
 <template>
   <div class="wrapper">
     <div class="left">
-      <img :src="list.photo" width="50" height="50">
+      <img :src="list.photo">
     </div>
     <div class="middle">
       <p>{{list.nickname}}</p>
       <p>关注 12155 | 粉丝 45485</p>
-      <p>地址：湖北 武汉</p>
+      <p>地址：{{list.address}}</p>
     </div>
     <div class="right">
       <span>+ 关注</span>
@@ -37,19 +37,23 @@
 
   .left {
     float: left;
-    width: 12%;
+    width: 100px;
   }
 
   .left img {
+    width: 80px;
+    height: 80px;
     border-radius: 50%;
   }
 
   .middle {
+    margin-left: 2%;
     width: 63%;
   }
 
   .right {
-    width: 25%;
+    float: right;
+    width: 20%;
   }
 
 </style>
