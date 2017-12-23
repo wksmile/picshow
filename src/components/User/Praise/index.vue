@@ -9,7 +9,7 @@
 </template>
 
 <script>
-  // 个人页面已收藏的状态
+  // 个人页面已赞的状态
   import $ from 'jquery';
   import Cookies from 'js-cookie';
   import InterestBlock from "../../InterestBlock";
@@ -27,17 +27,17 @@
       requestData () {
         if(Cookies.get('token')) {
           var that = this;
-          $.post("http://192.168.1.104:8081/user/info/favorite",{
+          $.post("http://192.168.1.104:8081/user/info/thumbup",{
             token: Cookies.get('token'),
             page: 1,
             rows: 10
           })
           .done(function(res){
             if(res.status == 200) {
-              console.log('已收藏返回',res);
+              console.log('已赞返回',res);
               that.lists = res.rows;
             } else {
-              console.log('已发布返回');
+              console.log('已赞返回');
               // 应该加一个弹框提示未登录
               return;
             }

@@ -32,10 +32,10 @@
           <span @click="changeComponent('Fans')">粉丝
             <span>{{publichNum.fanNum}}</span>
           </span>
-          <span @click="changeComponent('Launched')">收藏
+          <span @click="changeComponent('Collect')">收藏
             <span>{{publichNum.favoriteNum}}</span>
           </span>
-          <span @click="changeComponent('Launched')">赞
+          <span @click="changeComponent('Praise')">赞
             <span>{{publichNum.thumbupNum}}</span>
           </span>
         </div>
@@ -58,6 +58,7 @@
   import Launched from './Launched';     // 已发布
   import Comment from '../Comment';
   import Fans from './Fans';              //  粉丝
+  import Praise from './Praise';          // 赞
   import man from '../../public/images/man.png';
   import women from '../../public/images/women.png';
 
@@ -130,7 +131,8 @@
       Attention,
       Launched,
       Collect,
-      Fans
+      Fans,
+      Praise
     }
   }
 </script>
