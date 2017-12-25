@@ -10,7 +10,7 @@
  * @return {[string]} [计算后的时间字符串]
  * */
 
-var publicTime = function (t) {
+export function publicTime(t) {
   let tdate = new Date(t),          // 时间毫秒数
     tYear = tdate.getFullYear(),   // 返回年份
     tMonth = tdate.getMonth(),     // 返回的月份
@@ -44,7 +44,30 @@ else if (dYear > 0) return tYear + '年' + tMonth + '月' + tDay + '日 ' + hour
 return '格式错误';
 }
 
-export default publicTime;
+ /** 根据给的出生年日年龄
+  * @param t [给的时间]
+  * @return {number} [年龄]
+  */
+
+export function age(t) {
+  let tdate = new Date(t),          // 时间毫秒数
+    tYear = tdate.getFullYear(),   // 返回年份
+    tMonth = tdate.getMonth(),     // 返回的月份
+    tDay = tdate.getDate()        // 返回的天
+
+  let date = new Date(),          //   当前时间
+    year = date.getFullYear(),    //  当前时间的年份
+    month = date.getMonth(),      // 当前时间的月份
+    day = date.getDate()         //  当前时间的天
+
+  let dYear = year - tYear,
+    dMonth = month - tMonth,
+    dDay = day - tDay;
+
+  if(dMonth < 0) return dYear - 1;
+  else if (dMonth == 0) return dDay < 0 ? dYear - 1 : dYear;
+  return dYear;
+}
 
 /*test*/
 // console.log('测试刚刚-',publicTime(1513956395187));
