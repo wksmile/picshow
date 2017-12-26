@@ -5,18 +5,20 @@
       <ul class="select">
         <li><span>昵称</span><input v-model="nickname"/></li>
         <li><span>性别</span>
-          <label for="man">
-          男：<input type="radio" name="sex" value="man" id="man" checked/></label>
-          <label for="wommom">
-            女：<input type="radio" name="sex" value="wommom" id="wommom"/></label>
+          <label for="man">男</label>
+          <input type="radio" name="sex" value="1" id="man" v-model="sex" checked/>
+          <label for="wommom">女</label>
+          <input type="radio" name="sex" value="2" id="wommom" v-model="sex" />
         </li>
         <li><span>地址</span><v-distpicker hide-area @selected="selectAddress"></v-distpicker></li>
         <li><span>电话</span><input v-model="phone"/></li>
         <li><span>学校</span><input v-model="school"/></li>
-        <li><span>生日</span><datepicker @selected="selectBirthday" v-model="birthday" class="birthday"></datepicker></li>
-        <li><span>简介</span><textarea v-model="description"></textarea></li>
+        <li><span>生日</span>
+          <datepicker  @selected="selectBirthday" v-model="birthday"></datepicker>
+        </li>
+        <li><span>简介</span><textarea class="description" v-model="description"></textarea></li>
       </ul>
-      <input class="sumbit" type="button" value="保存" />
+      <input class="sumbit" type="button" value="保存" @click="submit" />
     </div>
     <div class="right">
       <my-upload field="uploadFile"
@@ -29,10 +31,17 @@
                  url="http://192.168.1.104:8083/user/update/photo/upload"
                  :params="params"
                  :headers="headers"
-                 img-format="png"></my-upload>
-      <img :src="imgDataUrl">
+                 img-format="png"
+                 ></my-upload>
+      <img :src="imgDataUrl" width="200">
       <p><a class="btn" @click="toggleShow">设置头像</a></p>
     </div>
+    <form id="uploadForm" action="http://192.168.1.104:8083/user/update/photo/upload"  method="post" enctype="multipart/form-data">
+      <input id="uploadFile" type="file" name="uploadFile"/>
+      <input id="id" name="id" value="2"/>
+      <input id="token" name="token" value="dd9dbb12-74b0-4845-9bf4-4d31a84ff2b3"/>
+      <input id="upload" type="submit" value="upload">
+    </form>
   </div>
 </template>
 
@@ -52,9 +61,11 @@
         nickname: '',
         phone: '',
         school: '',
+        address: '',
         birthday: '',
         description: '',
         show: false,
+        sex: null,
         params: {
 //          token: '123456798',
 //          name: 'avatar'
@@ -62,12 +73,13 @@
         headers: {
 //        smail: '*_~'
           'Access-Control-Allow-Origin': '*',
-          'enctype':'multipart/form-data'
+          'Content-type' : 'multipart/form-data, boundary=AaB03x',
+          'withCredentials': true
         },
         imgDataUrl: person // the datebase64 url of created image
       }
     },
-    created () {
+    beforeMounted () {
       this.init();
     },
     computed: {
@@ -77,16 +89,101 @@
       }
     },
     methods: {
+      uploadFile () {
+          var that = this;
+        $.ajax({
+          url: "http://192.168.1.104:8083/user/update/photo/upload",
+          type: 'POST',
+          cache: false,
+          data: {
+            'uploadFile':new FormData($("#uploadForm")[0]),
+            'id': that.information.id,
+            'token': Cookies.get('token')
+          },
+          processData: false,
+          contentType: false,
+          success: function (result) {
+          },
+          error: function (err) {
+          }
+        });
+      },
+      demo (file) {
+        if (file.files && file.files[0])
+        {
+          var reader = new FileReader();
+          reader.onload = function(evt){
+            console.log('用户上传',evt.target.result)
+          }
+          var that = this;
+          $.ajax({
+            url: 'http://192.168.1.104:8083/user/update/photo/upload',
+            type: 'POST',
+            headers: {
+              'Access-Control-Allow-Origin': '*',
+              'Content-type' : 'multipart/form-data',
+              'Access-Control-Allow-Headers': 'post,get,options'
+            },
+            data: {
+              'uploadFile': file.files[0],
+              'id': that.information.id,
+              'token': Cookies.get('token')
+            },
+            success: function (res) {
+              console.log('uploadFile:',res)
+            },
+            error: function (err) {
+              console.log('uploadFile err:',err)
+            }
+          })
+        }
+        else
+        {
+          console.log('upload fail');
+        }
+      },
+      submit () {
+        if(Cookies.get('token')) {
+          console.log('token:---',Cookies.get('token'));
+          var that = this;
+          $.post("http://192.168.1.104:8083/user/update/info",{
+            token: Cookies.get('token'),
+            id: that.information.id,
+            nickname: that.nickname,
+            sex: that.sex,
+            address: that.address,
+            phone: that.phone,
+            school: that.school,
+            birthday: that.birthday,
+            description: that.description
+          })
+          .done(function(res){
+            if(res.status == 200) {
+              console.log('上传用户信息',res);
+            } else {
+              // 应该加一个弹框提示未登录
+              console.log('上传用户信息失败');
+              return;
+            }
+          });
+        } else {
+          console.log('has not logined');
+        }
+      },
       init () {
           console.log('Use nested data properties instead:',this.information);
         let {username, nickname, phone, school, birthday, description} = this.information;
         Object.assign(this.$data,{username, nickname, phone, school, birthday, description});
+        this.imgDataUrl = this.information.photo
       },
-      selectAddress (value) {
-        console.log('selectAddress:', value);
+      selectAddress (ad) {
+        console.log('selectAddress:', ad);
+        this.address = ad.province.value + ',' + ad.city.value;
       },
       selectBirthday (value) {
-        console.log('selectBirthday',value);
+          // 将日期转化为毫秒数
+        console.log('selectBirthday',value.getTime());
+        this.birthday = value.getTime();
       },
       toggleShow() {
         this.show = !this.show;
@@ -104,27 +201,28 @@
           id: this.information.id,
           token: Cookies.get('token')
         }
-        var that = this;
-        $.ajax({
-          url: 'http://192.168.1.104:8083/user/update/photo/upload',
-          type: 'POST',
-          headers: {
-            'Access-Control-Allow-Origin': '*',
-            'enctype':'multipart/form-data',
-            'Access-Control-Allow-Headers': 'post,get'
-          },
-          data: {
-            'uploadFile': field,
-            'id': that.information.id,
-            'token': Cookies.get('token')
-          },
-          success: function (res) {
-            console.log('uploadFile:',res)
-          },
-          error: function (err) {
-            console.log('uploadFile err:',err)
-          }
-        })
+//        var that = this;
+//        $.ajax({
+//          url: 'http://192.168.1.104:8083/user/update/photo/upload',
+//          type: 'POST',
+//          headers: {
+//            'Access-Control-Allow-Origin': '*',
+//            'Content-type' : 'multipart/form-data',
+//            'Access-Control-Allow-Headers': 'post,get,options',
+//            'withCredentials': true
+//          },
+//          data: {
+//            'uploadFile': field,
+//            'id': that.information.id,
+//            'token': Cookies.get('token')
+//          },
+//          success: function (res) {
+//            console.log('uploadFile:',res)
+//          },
+//          error: function (err) {
+//            console.log('uploadFile err:',err)
+//          }
+//        })
       },
       /**
        * upload success
@@ -176,7 +274,8 @@
 
   .select li {
     margin: 10px 0;
-    height: 40px;
+    display: flex;
+    align-items: center;
   }
 
   .select li span {
@@ -201,15 +300,29 @@
     border-radius: 0.25rem;
   }
 
+  .birthday {
+    height: 40px;
+  }
+
+  #man {
+    margin-right: 30px;
+  }
+
+  .description {
+    resize:none
+  }
+
   .username {
     font: bold 1.2pc "Helvetica Neue", Helvetica, Arial, sans-serif;
   }
 
   .sumbit {
-    width: 20%;
     height: 40px;
+    width: 40%;
     line-height: 40px;
-    background: #00ffb6;
+    margin-left: 42px;
+    background: #00f43f;
+    border: none;
   }
 
   .right {
