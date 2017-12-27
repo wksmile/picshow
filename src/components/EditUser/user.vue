@@ -20,28 +20,30 @@
       </ul>
       <input class="sumbit" type="button" value="保存" @click="submit" />
     </div>
-    <div class="right">
-      <my-upload field="uploadFile"
-                 @crop-success="cropSuccess"
-                 @crop-upload-success="cropUploadSuccess"
-                 @crop-upload-fail="cropUploadFail"
-                 v-model="show"
-                 :width="300"
-                 :height="300"
-                 url="http://192.168.1.104:8083/user/update/photo/upload"
-                 :params="params"
-                 :headers="headers"
-                 img-format="png"
-                 ></my-upload>
-      <img :src="imgDataUrl" width="200">
-      <p><a class="btn" @click="toggleShow">设置头像</a></p>
+    <!--<form id="uploadForm" action="http://192.168.1.104:8083/user/update/photo/upload"  method="post" enctype="multipart/form-data">-->
+      <!--<input id="uploadFile" type="file" name="uploadFile"/>-->
+      <!--<input id="id" name="id" value="2"/>-->
+      <!--<input id="token" name="token" value="dd9dbb12-74b0-4845-9bf4-4d31a84ff2b3"/>-->
+      <!--<input id="upload" type="submit" value="upload">-->
+    <!--</form>-->
+
+    <div class="center">
+      <vue-core-image-upload
+        :class="['btn', 'btn-primary']"
+        :text="上传头像"
+        :crop="false"
+        :extensions="png,jpg,gif"
+        @imageuploaded="imageuploaded"
+        @imagechanged="imagechanged"
+        :data="data"
+        :cropBtn="{ok:'Save','cancel':'Give Up'}"
+        :inputOfFile="uploadFile"
+        :max-file-size="9242880"
+        :maxWidth="200"
+        url="http://192.168.1.104:8083/user/update/photo/upload" >
+        <button>上传头像</button>
+      </vue-core-image-upload>
     </div>
-    <form id="uploadForm" action="http://192.168.1.104:8083/user/update/photo/upload"  method="post" enctype="multipart/form-data">
-      <input id="uploadFile" type="file" name="uploadFile"/>
-      <input id="id" name="id" value="2"/>
-      <input id="token" name="token" value="dd9dbb12-74b0-4845-9bf4-4d31a84ff2b3"/>
-      <input id="upload" type="submit" value="upload">
-    </form>
   </div>
 </template>
 
@@ -50,9 +52,11 @@
   import VDistpicker from 'v-distpicker';
   import Datepicker from 'vuejs-datepicker';
   import myUpload from 'vue-image-crop-upload';
+  import VueCoreImageUpload from 'vue-core-image-upload'
   import $ from 'jquery';
   import Cookies from 'js-cookie';
   import person from './person.png';      //  这里的头像不能直接写url data到src，必须要通过computed返回
+  import ImgCrop from './person.png'
 
   export default {
     data () {
@@ -66,16 +70,16 @@
         description: '',
         show: false,
         sex: null,
+        data: null,
         params: {
 //          token: '123456798',
 //          name: 'avatar'
         },
-        headers: {
-//        smail: '*_~'
-          'Access-Control-Allow-Origin': '*',
-          'Content-type' : 'multipart/form-data, boundary=AaB03x',
-          'withCredentials': true
-        },
+        src: '',
+//        headers: {
+//          'Access-Control-Allow-Origin': '*',
+//          'Content-type' : 'multipart/form-data'
+//        },
         imgDataUrl: person // the datebase64 url of created image
       }
     },
@@ -89,6 +93,21 @@
       }
     },
     methods: {
+      imagechanged (file) {
+          console.log('vue-core-image-upload file:',file);
+        this.data = {
+          'uploadFile': file,
+          'id': this.information.id,
+          'token': Cookies.get('token')
+        }
+      },
+      imageuploaded(res) {
+        console.log('vue-core-image-upload res: ',res);
+//        this.imagesUpload = res.
+        if(res.status == 201) {
+
+        }
+      },
       uploadFile () {
           var that = this;
         $.ajax({
@@ -107,40 +126,6 @@
           error: function (err) {
           }
         });
-      },
-      demo (file) {
-        if (file.files && file.files[0])
-        {
-          var reader = new FileReader();
-          reader.onload = function(evt){
-            console.log('用户上传',evt.target.result)
-          }
-          var that = this;
-          $.ajax({
-            url: 'http://192.168.1.104:8083/user/update/photo/upload',
-            type: 'POST',
-            headers: {
-              'Access-Control-Allow-Origin': '*',
-              'Content-type' : 'multipart/form-data',
-              'Access-Control-Allow-Headers': 'post,get,options'
-            },
-            data: {
-              'uploadFile': file.files[0],
-              'id': that.information.id,
-              'token': Cookies.get('token')
-            },
-            success: function (res) {
-              console.log('uploadFile:',res)
-            },
-            error: function (err) {
-              console.log('uploadFile err:',err)
-            }
-          })
-        }
-        else
-        {
-          console.log('upload fail');
-        }
       },
       submit () {
         if(Cookies.get('token')) {
@@ -184,73 +169,13 @@
           // 将日期转化为毫秒数
         console.log('selectBirthday',value.getTime());
         this.birthday = value.getTime();
-      },
-      toggleShow() {
-        this.show = !this.show;
-      },
-      /**
-       * crop success
-       *
-       * [param] imgDataUrl
-       * [param] field
-       */
-      cropSuccess(imgDataUrl, field){
-        console.log('-------- crop success --------');
-        this.imgDataUrl = imgDataUrl;
-        this.params = {
-          id: this.information.id,
-          token: Cookies.get('token')
-        }
-//        var that = this;
-//        $.ajax({
-//          url: 'http://192.168.1.104:8083/user/update/photo/upload',
-//          type: 'POST',
-//          headers: {
-//            'Access-Control-Allow-Origin': '*',
-//            'Content-type' : 'multipart/form-data',
-//            'Access-Control-Allow-Headers': 'post,get,options',
-//            'withCredentials': true
-//          },
-//          data: {
-//            'uploadFile': field,
-//            'id': that.information.id,
-//            'token': Cookies.get('token')
-//          },
-//          success: function (res) {
-//            console.log('uploadFile:',res)
-//          },
-//          error: function (err) {
-//            console.log('uploadFile err:',err)
-//          }
-//        })
-      },
-      /**
-       * upload success
-       *
-       * [param] jsonData   服务器返回数据，已进行json转码
-       * [param] field
-       */
-      cropUploadSuccess(jsonData, field){
-        console.log('-------- upload success --------');
-        console.log(jsonData);
-        console.log('field: ' + field);
-      },
-      /**
-       * upload fail
-       *
-       * [param] status    server api return error status, like 500
-       * [param] field
-       */
-      cropUploadFail(status, field){
-        console.log('-------- upload fail --------');
-        console.log(status);
-        console.log('field: ' + field);
       }
     },
     components: {
       VDistpicker,
       Datepicker,
-      myUpload
+      myUpload,
+      VueCoreImageUpload
     }
   }
 </script>

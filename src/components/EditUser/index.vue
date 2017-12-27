@@ -109,7 +109,7 @@ ul,li {
 
 .left {
   width: 300px;
-  background: #dffff8;
+  background: #efecf4;
   padding: 20px 0;
 }
 
@@ -124,6 +124,6 @@ ul,li {
 
 .right {
   flex: 1;
-  background: #fff4fd;
+  background: #fffffe;
 }
 </style>
