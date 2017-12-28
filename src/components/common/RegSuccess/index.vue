@@ -2,7 +2,7 @@
   <div class="wrapper">
     <div class="content">
       <div class="left">
-        <img src="../../public/pic/kk.jpg">
+        <img src="kk.jpg">
       </div>
       <div class="right">
         <p class="success">注册成功！</p>
